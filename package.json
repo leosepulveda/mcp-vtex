@@ -1,0 +1,55 @@
+{
+  "name": "mcp-vtex",
+  "version": "1.4.0",
+  "description": "MCP server for VTEX API - Complete integration for e-commerce management",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "mcp-vtex": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "dev": "tsc --watch",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "vtex",
+    "vtex-api",
+    "ecommerce",
+    "e-commerce",
+    "catalog",
+    "inventory",
+    "marketplace",
+    "pricing",
+    "promotions",
+    "cursor",
+    "claude",
+    "claude-desktop",
+    "ai",
+    "retail"
+  ],
+  "author": "Leonardo Sepúlveda <lsepulvedatabares@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leosepulveda/mcp-vtex.git"
+  },
+  "bugs": {
+    "url": "https://github.com/leosepulveda/mcp-vtex/issues"
+  },
+  "homepage": "https://github.com/leosepulveda/mcp-vtex#readme",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "axios": "^1.7.9",
+    "dotenv": "^17.2.3",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
+
