@@ -77,6 +77,14 @@
 - **Provider Management**: Add, update, remove payment integrations
 - **Payment Configuration**: Complete gateway setup
 
+### 🎁 Gift Cards (NEW v1.5.0!)
+- **Gift Card Creation**: Create custom gift cards with balance and expiration
+- **Gift Card Lookup**: Retrieve by ID or redemption code
+- **Transaction Management**: Add credits or debits to gift cards
+- **Gift Card Listing**: View all gift cards with pagination
+- **Restrictions**: Configure owner-only usage
+- **Use Cases**: Loyalty programs, VIP reactivation, store credit, refunds
+
 ---
 
 ## 🚀 Quick Start
@@ -239,7 +247,7 @@ Once configured, interact with VTEX using natural language:
 
 ---
 
-## 🛠️ Available Tools (159 Tools)
+## 🛠️ Available Tools (164 Tools)
 
 ### Catalog API (30 tools)
 - **Products**: Create, Get, Update, Delete, List
@@ -282,6 +290,9 @@ Once configured, interact with VTEX using natural language:
 
 ### Payment Gateway API (7 tools) 🆕
 - List Providers, Get Provider, Create Provider, Update Provider, Delete Provider, List Payment Methods, Get Transaction
+
+### Gift Card API (5 tools) 🎁 NEW in v1.5.0!
+- Create Gift Card, Get Gift Card, List Gift Cards, Get Gift Card by Code, Create Gift Card Transaction
 
 ---
 
