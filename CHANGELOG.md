@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-01-02
+
+### Added - Gift Card API! 🎁
+
+#### Gift Card Management (5 new tools)
+- **vtex_create_gift_card**: Create new gift cards with custom balance, expiration, and restrictions
+- **vtex_get_gift_card**: Retrieve gift card details by ID
+- **vtex_list_gift_cards**: List all gift cards with pagination support
+- **vtex_get_gift_card_by_code**: Search and validate gift cards by redemption code
+- **vtex_create_gift_card_transaction**: Add credit or debit transactions to existing gift cards
+
+### Enhanced
+- Complete gift card lifecycle management from creation to redemption
+- Support for restricted gift cards (owner-only usage)
+- Transaction history tracking for gift cards
+- Custom expiration dates and balance management
+- Integration with VTEX Gift Card System API
+
+### Use Cases
+- Customer retention and loyalty programs
+- VIP client reactivation campaigns
+- Promotional incentives and rewards
+- Store credit management
+- Refund handling via gift cards
+- Customer service compensation
+
+### Package Optimizations
+- Reduced package size from 105.1 kB to 46.4 kB (56% reduction)
+- Excluded internal demo dashboards from npm distribution
+- Added `.npmignore` for better package management
+- Faster installation times
+
+### Statistics
+- **Total Tools**: Increased from 159 to 164
+- **Gift Card Tools**: 5 complete tools for full gift card management
+- **Package Size**: 46.4 kB compressed / 431.9 kB unpacked
+
+---
+
 ## [1.4.0] - 2024-12-09
 
 ### Added - Specification Field Creation! 🏗️

@@ -1,0 +1,38 @@
+# Exclude internal dashboards
+dashboard-*.html
+
+# Development files
+src/
+tsconfig.json
+*.test.ts
+*.spec.ts
+
+# Documentation (keep only essential)
+PROJECT_SUMMARY.md
+QUICKSTART.md
+TESTING.md
+EXAMPLES.md
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
