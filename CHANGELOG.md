@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-01-02
+
+### Added - Smart Tool Filtering 🎯
+
+#### New Profile System
+- **VTEX_MCP_PROFILE** environment variable to control tool visibility
+  - `essential` (default): 76 most-used tools for daily store operations
+  - `full`: All 131 tools available
+
+#### Essential Profile Features
+- Optimized for AI model performance (under 80-tool limit)
+- Includes core store management tools:
+  - Products, SKUs, Inventory, Pricing
+  - Orders, Categories, Brands
+  - Promotions, Coupons, Gift Cards
+  - Warehouses, Docks, Email
+  - Master Data, Search
+  
+#### Excluded from Essential Profile
+- Technical configuration tools (Specifications, Subscriptions)
+- Marketplace/Seller tools
+- Frontend cart management
+- Payment gateway integrations
+- Session management
+- Reviews & Ratings
+- CMS templates
+- Auth/VTEX ID
+
+### Why This Matters
+- **Better AI Performance**: Fewer tools = more reliable model behavior
+- **Faster Loading**: Reduced initialization time
+- **Focused Automation**: Only tools needed for daily operations
+- **Backward Compatible**: Use `VTEX_MCP_PROFILE=full` for all 131 tools
+
+### Migration Guide
+- Default behavior unchanged if you don't set the env var
+- To keep all tools: Add `VTEX_MCP_PROFILE=full` to your `.cursor/mcp.json`
+- Recommended: Use default `essential` profile for better performance
+
 ## [1.5.0] - 2026-01-02
 
 ### Added - Gift Card API! 🎁

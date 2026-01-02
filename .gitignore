@@ -37,6 +37,34 @@ logs/
 tmp/
 temp/
 
+# Internal demo dashboards
+dashboard-*.html
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

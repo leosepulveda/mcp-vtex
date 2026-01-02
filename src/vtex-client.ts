@@ -6,6 +6,7 @@ import type {
   Category,
   Brand,
   Specification,
+  SpecificationGroup,
   SpecificationField,
   SpecificationValue,
   SKUSpecificationAssignment,
@@ -304,31 +305,199 @@ export class VtexClient {
     specifications: SKUSpecificationAssignment[]
   ): Promise<ApiResponse> {
     try {
-      const response = await this.catalogClient.post(
-        `/pvt/stockkeepingunit/${skuId}/specification`,
-        specifications
-      );
-      return { data: response.data };
+      // VTEX API expects one specification at a time, not an array
+      const results = [];
+      for (const spec of specifications) {
+        const response = await this.catalogClient.post(
+          `/pvt/stockkeepingunit/${skuId}/specification`,
+          spec  // Send single object, not array
+        );
+        results.push(response.data);
+      }
+      return { data: results };
     } catch (error: any) {
-      return { error: error.response?.data?.message || error.message };
+      return { 
+        error: error.response?.data?.message || error.response?.data || error.message,
+        status: error.response?.status,
+        details: error.response?.data
+      };
     }
   }
 
   async listCategorySpecifications(categoryId: string): Promise<ApiResponse> {
     try {
-      const response = await this.catalogClient.get(`/pvt/specification/listByCategoryId/${categoryId}`);
+      const baseUrl = this.catalogClient.defaults.baseURL?.replace('/api/catalog', '');
+      const url = `${baseUrl}/api/catalog_system/pub/specification/field/listByCategoryId/${categoryId}`;
+      
+      const response = await axios.get(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-VTEX-API-AppKey': this.catalogClient.defaults.headers['X-VTEX-API-AppKey'],
+          'X-VTEX-API-AppToken': this.catalogClient.defaults.headers['X-VTEX-API-AppToken']
+        }
+      });
       return { data: response.data };
     } catch (error: any) {
-      return { error: error.response?.data?.message || error.message };
+      return { 
+        error: error.response?.data?.message || error.message,
+        status: error.response?.status,
+        details: error.response?.data
+      };
     }
   }
 
   async createSpecificationField(field: SpecificationField): Promise<ApiResponse> {
     try {
-      const response = await this.catalogClient.post('/pvt/specification/field', field);
+      // Use catalog_system endpoint instead of catalog
+      const baseUrl = this.catalogClient.defaults.baseURL?.replace('/api/catalog', '');
+      const url = `${baseUrl}/api/catalog_system/pvt/specification/field`;
+      
+      // Add required defaults
+      const fieldData = {
+        ...field,
+        FieldGroupId: field.FieldGroupId || field.CategoryId,
+        Description: field.Description || field.Name || '',
+        Position: field.Position || 1
+      };
+      
+      const response = await axios.post(url, fieldData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-VTEX-API-AppKey': this.catalogClient.defaults.headers['X-VTEX-API-AppKey'],
+          'X-VTEX-API-AppToken': this.catalogClient.defaults.headers['X-VTEX-API-AppToken']
+        }
+      });
       return { data: response.data };
     } catch (error: any) {
-      return { error: error.response?.data?.message || error.message };
+      return { 
+        error: error.response?.data?.message || error.response?.data || error.message,
+        status: error.response?.status,
+        details: error.response?.data
+      };
+    }
+  }
+
+  async createSpecificationGroup(group: SpecificationGroup): Promise<ApiResponse> {
+    try {
+      const baseUrl = this.catalogClient.defaults.baseURL?.replace('/api/catalog', '');
+      const url = `${baseUrl}/api/catalog_system/pvt/specification/group`;
+      
+      const response = await axios.post(url, group, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-VTEX-API-AppKey': this.catalogClient.defaults.headers['X-VTEX-API-AppKey'],
+          'X-VTEX-API-AppToken': this.catalogClient.defaults.headers['X-VTEX-API-AppToken']
+        }
+      });
+      return { data: response.data };
+    } catch (error: any) {
+      return { 
+        error: error.response?.data?.message || error.response?.data || error.message,
+        status: error.response?.status,
+        details: error.response?.data
+      };
+    }
+  }
+
+  async listSpecificationGroups(categoryId: string): Promise<ApiResponse> {
+    try {
+      const baseUrl = this.catalogClient.defaults.baseURL?.replace('/api/catalog', '');
+      const url = `${baseUrl}/api/catalog_system/pvt/specification/groupbycategory/${categoryId}`;
+      
+      const response = await axios.get(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-VTEX-API-AppKey': this.catalogClient.defaults.headers['X-VTEX-API-AppKey'],
+          'X-VTEX-API-AppToken': this.catalogClient.defaults.headers['X-VTEX-API-AppToken']
+        }
+      });
+      return { data: response.data };
+    } catch (error: any) {
+      return { 
+        error: error.response?.data?.message || error.response?.data || error.message,
+        status: error.response?.status,
+        details: error.response?.data
+      };
+    }
+  }
+
+  async getSpecificationField(fieldId: string): Promise<ApiResponse> {
+    try {
+      const baseUrl = this.catalogClient.defaults.baseURL?.replace('/api/catalog', '');
+      const url = `${baseUrl}/api/catalog_system/pvt/specification/${fieldId}`;
+      
+      const response = await axios.get(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-VTEX-API-AppKey': this.catalogClient.defaults.headers['X-VTEX-API-AppKey'],
+          'X-VTEX-API-AppToken': this.catalogClient.defaults.headers['X-VTEX-API-AppToken']
+        }
+      });
+      return { data: response.data };
+    } catch (error: any) {
+      return { 
+        error: error.response?.data?.message || error.response?.data || error.message,
+        status: error.response?.status,
+        details: error.response?.data
+      };
+    }
+  }
+
+  async createSpecificationFieldValue(fieldId: string, value: { FieldValueName: string; Position?: number; IsActive?: boolean }): Promise<ApiResponse> {
+    try {
+      const baseUrl = this.catalogClient.defaults.baseURL?.replace('/api/catalog', '');
+      const url = `${baseUrl}/api/catalog_system/pvt/specification/fieldValue`;
+      
+      const valueData = {
+        FieldId: parseInt(fieldId),
+        Name: value.FieldValueName,
+        Position: value.Position || 1,
+        IsActive: value.IsActive !== undefined ? value.IsActive : true
+      };
+      
+      const response = await axios.post(url, valueData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-VTEX-API-AppKey': this.catalogClient.defaults.headers['X-VTEX-API-AppKey'],
+          'X-VTEX-API-AppToken': this.catalogClient.defaults.headers['X-VTEX-API-AppToken']
+        }
+      });
+      return { data: response.data };
+    } catch (error: any) {
+      return { 
+        error: error.response?.data?.message || error.response?.data || error.message,
+        status: error.response?.status,
+        details: error.response?.data
+      };
+    }
+  }
+
+  async listSpecificationFieldValues(fieldId: string): Promise<ApiResponse> {
+    try {
+      const baseUrl = this.catalogClient.defaults.baseURL?.replace('/api/catalog', '');
+      const url = `${baseUrl}/api/catalog_system/pvt/specification/field/${fieldId}/value`;
+      
+      const response = await axios.get(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-VTEX-API-AppKey': this.catalogClient.defaults.headers['X-VTEX-API-AppKey'],
+          'X-VTEX-API-AppToken': this.catalogClient.defaults.headers['X-VTEX-API-AppToken']
+        }
+      });
+      return { data: response.data };
+    } catch (error: any) {
+      return { 
+        error: error.response?.data?.message || error.response?.data || error.message,
+        status: error.response?.status,
+        details: error.response?.data
+      };
     }
   }
 

@@ -10,6 +10,8 @@ export interface VtexConfig {
 export interface ApiResponse {
   data?: any;
   error?: string;
+  status?: number;
+  details?: any;
 }
 
 // ========== CATALOG API ==========
@@ -118,6 +120,13 @@ export interface SpecificationField {
   DefaultValue?: string;
   FieldTypeId?: number;
   FieldTypeName?: string;
+}
+
+export interface SpecificationGroup {
+  Id?: number;
+  CategoryId: number;
+  Name: string;
+  Position?: number;
 }
 
 export interface SpecificationValue {

@@ -12,7 +12,7 @@ import { z } from 'zod';
 const server = new Server(
   {
     name: 'mcp-vtex',
-    version: '1.4.0',
+    version: '1.6.0',
   },
   {
     capabilities: {
@@ -26,6 +26,7 @@ const VTEX_ACCOUNT_NAME = process.env.VTEX_ACCOUNT_NAME;
 const VTEX_ENVIRONMENT = process.env.VTEX_ENVIRONMENT || 'vtexcommercestable';
 const VTEX_APP_KEY = process.env.VTEX_APP_KEY;
 const VTEX_APP_TOKEN = process.env.VTEX_APP_TOKEN;
+const VTEX_MCP_PROFILE = process.env.VTEX_MCP_PROFILE || 'essential'; // 'essential' or 'full'
 
 if (!VTEX_ACCOUNT_NAME || !VTEX_APP_KEY || !VTEX_APP_TOKEN) {
   console.error('Error: VTEX_ACCOUNT_NAME, VTEX_APP_KEY and VTEX_APP_TOKEN environment variables are required');
@@ -39,11 +40,60 @@ const vtexClient = new VtexClient({
   appToken: VTEX_APP_TOKEN,
 });
 
+// ========== PROFILE CONFIGURATION ==========
+
+const EXCLUDED_TOOLS_IN_ESSENTIAL = new Set([
+  // Specifications (too technical, rarely used)
+  'vtex_create_specification', 'vtex_get_sku_specifications', 'vtex_assign_sku_specification_value',
+  'vtex_list_category_specifications', 'vtex_create_specification_field', 'vtex_create_specification_group',
+  'vtex_list_specification_groups', 'vtex_get_specification_field', 'vtex_create_specification_field_value',
+  'vtex_list_specification_field_values',
+  
+  // Marketplace/Sellers (not all stores have marketplace)
+  'vtex_get_seller_commissions', 'vtex_update_seller_commission', 'vtex_get_sku_approval_status',
+  'vtex_approve_sku', 'vtex_deny_sku', 'vtex_invite_seller', 'vtex_list_sellers',
+  
+  // Cart Management (frontend, not backend automation)
+  'vtex_get_orderform', 'vtex_simulate_shipping', 'vtex_add_item_to_cart',
+  'vtex_remove_item_from_cart', 'vtex_update_item_quantity', 'vtex_add_coupon_to_cart', 'vtex_clear_cart',
+  
+  // Reviews & Ratings (not core for operations)
+  'vtex_create_review', 'vtex_get_review', 'vtex_list_reviews', 'vtex_delete_review',
+  'vtex_moderate_review', 'vtex_get_product_rating',
+  
+  // Payment Gateway (not needed for automation)
+  'vtex_create_payment', 'vtex_get_payment', 'vtex_cancel_payment', 'vtex_capture_payment',
+  'vtex_refund_payment', 'vtex_list_payment_methods',
+  
+  // Session Manager (not relevant for MCP)
+  'vtex_create_session', 'vtex_get_session', 'vtex_update_session',
+  
+  // Subscriptions (very specific feature)
+  'vtex_create_subscription', 'vtex_get_subscription', 'vtex_list_subscriptions',
+  'vtex_update_subscription', 'vtex_pause_subscription', 'vtex_cancel_subscription',
+  
+  // CMS (content management, not operations)
+  'vtex_list_cms_templates', 'vtex_get_cms_template', 'vtex_create_cms_template', 'vtex_delete_cms_template',
+  
+  // VTEX ID / Auth (not relevant for MCP)
+  'vtex_authenticate_user', 'vtex_get_user_profile', 'vtex_validate_token',
+  'vtex_create_app_token', 'vtex_list_app_tokens',
+  
+  // Gift Card Providers (only need gift card CRUD, not providers)
+  'vtex_list_gift_card_providers',
+]);
+
+function shouldIncludeTool(toolName: string): boolean {
+  if (VTEX_MCP_PROFILE === 'full') {
+    return true;
+  }
+  return !EXCLUDED_TOOLS_IN_ESSENTIAL.has(toolName);
+}
+
 // ========== LIST TOOLS ==========
 
 server.setRequestHandler(ListToolsRequestSchema, async () => {
-  return {
-    tools: [
+  const allTools = [
       // ========== CATALOG - PRODUCTS ==========
       {
         name: 'vtex_create_product',
@@ -257,6 +307,66 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             IsOnProductDetails: { type: 'boolean', description: 'Show on product page', default: true },
           },
           required: ['CategoryId', 'FieldTypeId', 'Name'],
+        },
+      },
+      {
+        name: 'vtex_create_specification_group',
+        description: 'Create a new specification group for a category',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            CategoryId: { type: 'number', description: 'Category ID' },
+            Name: { type: 'string', description: 'Group name' },
+            Position: { type: 'number', description: 'Display position', default: 1 },
+          },
+          required: ['CategoryId', 'Name'],
+        },
+      },
+      {
+        name: 'vtex_list_specification_groups',
+        description: 'List all specification groups for a category',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            categoryId: { type: 'string', description: 'Category ID' },
+          },
+          required: ['categoryId'],
+        },
+      },
+      {
+        name: 'vtex_get_specification_field',
+        description: 'Get details of a specification field by ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            fieldId: { type: 'string', description: 'Specification Field ID' },
+          },
+          required: ['fieldId'],
+        },
+      },
+      {
+        name: 'vtex_create_specification_field_value',
+        description: 'Create a new value for a specification field',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            fieldId: { type: 'string', description: 'Specification Field ID' },
+            FieldValueName: { type: 'string', description: 'Value name (e.g., "2016", "Mazda 2")' },
+            Position: { type: 'number', description: 'Display position', default: 1 },
+            IsActive: { type: 'boolean', description: 'Is active', default: true },
+          },
+          required: ['fieldId', 'FieldValueName'],
+        },
+      },
+      {
+        name: 'vtex_list_specification_field_values',
+        description: 'List all values for a specification field',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            fieldId: { type: 'string', description: 'Specification Field ID' },
+          },
+          required: ['fieldId'],
         },
       },
 
@@ -1668,7 +1778,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {},
         },
       },
-    ],
+    ];
+  
+  // Filter tools based on profile
+  const filteredTools = allTools.filter(tool => shouldIncludeTool(tool.name));
+  
+  return {
+    tools: filteredTools,
   };
 });
 
@@ -1758,6 +1874,32 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     if (name === 'vtex_create_specification_field') {
       const result = await vtexClient.createSpecificationField(args as any);
+      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+    }
+
+    if (name === 'vtex_create_specification_group') {
+      const result = await vtexClient.createSpecificationGroup(args as any);
+      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+    }
+
+    if (name === 'vtex_list_specification_groups') {
+      const result = await vtexClient.listSpecificationGroups((args as any).categoryId);
+      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+    }
+
+    if (name === 'vtex_get_specification_field') {
+      const result = await vtexClient.getSpecificationField((args as any).fieldId);
+      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+    }
+
+    if (name === 'vtex_create_specification_field_value') {
+      const { fieldId, ...value } = args as any;
+      const result = await vtexClient.createSpecificationFieldValue(fieldId, value);
+      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+    }
+
+    if (name === 'vtex_list_specification_field_values') {
+      const result = await vtexClient.listSpecificationFieldValues((args as any).fieldId);
       return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
     }
 
@@ -2412,7 +2554,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error('VTEX MCP Server running on stdio');
+  console.error(`VTEX MCP Server running on stdio (Profile: ${VTEX_MCP_PROFILE})`);
 }
 
 main().catch((error) => {
